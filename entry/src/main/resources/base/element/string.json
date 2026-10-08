@@ -1,0 +1,368 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "Dayer 主界面"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "Dayer"
+    },
+    {
+      "name": "home_title",
+      "value": "今日"
+    },
+    {
+      "name": "home_empty",
+      "value": "今天还没有任务"
+    },
+    {
+      "name": "home_empty_hint",
+      "value": "新建一个任务，填上你预计要花多久"
+    },
+    {
+      "name": "day_prev",
+      "value": "‹"
+    },
+    {
+      "name": "day_next",
+      "value": "›"
+    },
+    {
+      "name": "action_back_to_today",
+      "value": "回到今天"
+    },
+    {
+      "name": "history_empty",
+      "value": "这一天没有任务"
+    },
+    {
+      "name": "action_new_task",
+      "value": "新建任务"
+    },
+    {
+      "name": "action_save",
+      "value": "保存"
+    },
+    {
+      "name": "action_delete",
+      "value": "删除"
+    },
+    {
+      "name": "action_start",
+      "value": "开始"
+    },
+    {
+      "name": "action_complete",
+      "value": "完成"
+    },
+    {
+      "name": "action_undo_complete",
+      "value": "撤销完成"
+    },
+    {
+      "name": "edit_title_new",
+      "value": "新建任务"
+    },
+    {
+      "name": "edit_title_edit",
+      "value": "编辑任务"
+    },
+    {
+      "name": "label_task_title",
+      "value": "任务标题"
+    },
+    {
+      "name": "placeholder_task_title",
+      "value": "要做什么？"
+    },
+    {
+      "name": "label_estimated",
+      "value": "预计耗时"
+    },
+    {
+      "name": "label_estimated_hint",
+      "value": "你估计这件事要花多久"
+    },
+    {
+      "name": "label_priority",
+      "value": "优先级"
+    },
+    {
+      "name": "label_category",
+      "value": "分类"
+    },
+    {
+      "name": "label_detail",
+      "value": "备注"
+    },
+    {
+      "name": "placeholder_detail",
+      "value": "补充细节、要求、参考资料（选填）"
+    },
+    {
+      "name": "label_deadline",
+      "value": "截止时间"
+    },
+    {
+      "name": "deadline_not_set",
+      "value": "未设置"
+    },
+    {
+      "name": "error_title_required",
+      "value": "请填写任务标题"
+    },
+    {
+      "name": "error_title_too_long",
+      "value": "标题不能超过 50 字"
+    },
+    {
+      "name": "error_estimated_invalid",
+      "value": "预计耗时要大于 0 分钟"
+    },
+    {
+      "name": "detail_title",
+      "value": "任务详情"
+    },
+    {
+      "name": "label_estimated_time",
+      "value": "预计耗时"
+    },
+    {
+      "name": "label_actual_time",
+      "value": "实际耗时"
+    },
+    {
+      "name": "label_deviation",
+      "value": "预估偏差"
+    },
+    {
+      "name": "label_deviation_reason",
+      "value": "偏差原因"
+    },
+    {
+      "name": "placeholder_deviation_reason",
+      "value": "为什么和预计不一样？（选填）"
+    },
+    {
+      "name": "label_created_at",
+      "value": "创建于"
+    },
+    {
+      "name": "badge_completed_late",
+      "value": "逾期完成"
+    },
+    {
+      "name": "priority_high",
+      "value": "高"
+    },
+    {
+      "name": "priority_medium",
+      "value": "中"
+    },
+    {
+      "name": "priority_low",
+      "value": "低"
+    },
+    {
+      "name": "category_work",
+      "value": "工作"
+    },
+    {
+      "name": "category_study",
+      "value": "学习"
+    },
+    {
+      "name": "category_life",
+      "value": "生活"
+    },
+    {
+      "name": "category_entertainment",
+      "value": "娱乐"
+    },
+    {
+      "name": "category_fitness",
+      "value": "健身"
+    },
+    {
+      "name": "status_not_started",
+      "value": "待开始"
+    },
+    {
+      "name": "status_in_progress",
+      "value": "进行中"
+    },
+    {
+      "name": "status_completed",
+      "value": "已完成"
+    },
+    {
+      "name": "status_unfinished",
+      "value": "未完成"
+    },
+    {
+      "name": "duration_hour_minute",
+      "value": "%d小时%d分钟"
+    },
+    {
+      "name": "duration_hour",
+      "value": "%d小时"
+    },
+    {
+      "name": "duration_minute",
+      "value": "%d分钟"
+    },
+    {
+      "name": "deviation_accurate",
+      "value": "基本吻合"
+    },
+    {
+      "name": "deviation_over",
+      "value": "超出"
+    },
+    {
+      "name": "deviation_under",
+      "value": "节省"
+    },
+    {
+      "name": "deviation_no_timing",
+      "value": "未记录计时"
+    },
+    {
+      "name": "deviation_time_anomaly",
+      "value": "时间异常"
+    },
+    {
+      "name": "toast_load_failed",
+      "value": "任务读取失败"
+    },
+    {
+      "name": "toast_save_failed",
+      "value": "保存失败，请重试"
+    },
+    {
+      "name": "toast_delete_failed",
+      "value": "删除失败，请重试"
+    },
+    {
+      "name": "dialog_delete_title",
+      "value": "删除任务"
+    },
+    {
+      "name": "dialog_delete_message",
+      "value": "删除后无法恢复，确定删除吗？"
+    },
+    {
+      "name": "dialog_confirm",
+      "value": "删除"
+    },
+    {
+      "name": "dialog_cancel",
+      "value": "取消"
+    },
+    {
+      "name": "action_edit",
+      "value": "编辑"
+    },
+    {
+      "name": "action_mark_unfinished",
+      "value": "标记未完成"
+    },
+    {
+      "name": "action_clear",
+      "value": "清除"
+    },
+    {
+      "name": "label_status",
+      "value": "状态"
+    },
+    {
+      "name": "coach_reference_title",
+      "value": "同类任务参考"
+    },
+    {
+      "name": "coach_ratio",
+      "value": "%d.%d 倍"
+    },
+    {
+      "name": "coach_ready",
+      "value": "你这类任务实际通常花到预估的"
+    },
+    {
+      "name": "coach_suggest_label",
+      "value": "建议预留"
+    },
+    {
+      "name": "coach_apply",
+      "value": "用这个数"
+    },
+    {
+      "name": "coach_not_ready",
+      "value": "这类任务只记录了 %d 次，样本还太少，先按你自己的预估来"
+    },
+    {
+      "name": "coach_basis",
+      "value": "基于最近 %d 次已完成且有计时的同类任务"
+    },
+    {
+      "name": "label_actual_input",
+      "value": "实际用时"
+    },
+    {
+      "name": "placeholder_actual_input",
+      "value": "这件事实际花了多少分钟"
+    },
+    {
+      "name": "hint_actual_input",
+      "value": "没点「开始」也能补：填个大概，估时校准才有数据可用"
+    },
+    {
+      "name": "error_actual_invalid",
+      "value": "实际用时要大于 0 分钟"
+    },
+    {
+      "name": "action_apply_actual",
+      "value": "记录实际用时"
+    },
+    {
+      "name": "progress_elapsed",
+      "value": "已用 %d 分钟"
+    },
+    {
+      "name": "progress_remaining",
+      "value": "还剩 %d 分钟"
+    },
+    {
+      "name": "progress_over",
+      "value": "已超出 %d 分钟"
+    },
+    {
+      "name": "label_progress_elapsed",
+      "value": "已用"
+    },
+    {
+      "name": "label_progress_remaining",
+      "value": "还剩"
+    },
+    {
+      "name": "label_progress_over",
+      "value": "已超出"
+    },
+    {
+      "name": "progress_prompt_near",
+      "value": "快到预估时长了 —— 收个尾，还是去改一下预估？"
+    },
+    {
+      "name": "progress_prompt_over",
+      "value": "已经超出预估时长。这件事还差多少？"
+    },
+    {
+      "name": "progress_ack",
+      "value": "知道了"
+    }
+  ]
+}

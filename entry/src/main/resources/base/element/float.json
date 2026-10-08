@@ -1,0 +1,76 @@
+{
+  "float": [
+    {
+      "name": "page_text_font_size",
+      "value": "50fp"
+    },
+    {
+      "name": "font_title",
+      "value": "20fp"
+    },
+    {
+      "name": "font_subtitle",
+      "value": "18fp"
+    },
+    {
+      "name": "font_body",
+      "value": "16fp"
+    },
+    {
+      "name": "font_caption",
+      "value": "14fp"
+    },
+    {
+      "name": "font_small",
+      "value": "12fp"
+    },
+    {
+      "name": "spacing_small",
+      "value": "8vp"
+    },
+    {
+      "name": "spacing_medium",
+      "value": "12vp"
+    },
+    {
+      "name": "spacing_large",
+      "value": "16vp"
+    },
+    {
+      "name": "spacing_xlarge",
+      "value": "24vp"
+    },
+    {
+      "name": "radius_card",
+      "value": "12vp"
+    },
+    {
+      "name": "radius_tag",
+      "value": "6vp"
+    },
+    {
+      "name": "spacing_xsmall",
+      "value": "4vp"
+    },
+    {
+      "name": "height_input",
+      "value": "48vp"
+    },
+    {
+      "name": "height_textarea",
+      "value": "96vp"
+    },
+    {
+      "name": "height_button",
+      "value": "44vp"
+    },
+    {
+      "name": "width_priority_bar",
+      "value": "4vp"
+    },
+    {
+      "name": "height_priority_bar",
+      "value": "40vp"
+    }
+  ]
+}

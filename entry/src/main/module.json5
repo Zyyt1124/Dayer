@@ -1,0 +1,55 @@
+{
+  "module": {
+    "name": "entry",
+    "type": "entry",
+    "description": "$string:module_desc",
+    "mainElement": "EntryAbility",
+    "deviceTypes": [
+      "phone"
+    ],
+    "deliveryWithInstall": true,
+    "installationFree": false,
+    // 这里**没有** requestPermissions：本项目不申请任何权限。
+    // 曾经为代理提醒加过 ohos.permission.PUBLISH_AGENT_REMINDER，已实测放弃 ——
+    // 它是系统授权型（不弹授权框），但「能登记几条」由 AGC 侧的「代理提醒」开放能力审批决定，
+    // 未获批时配额恒为 0，publishReminder 首条就返回 1700002（普通 publish 却能成功，
+    // 证明是配额为 0 而非用满）。中途纠偏因此改为纯应用内实现，见 common/TaskProgress.ets。
+    "pages": "$profile:main_pages",
+    "abilities": [
+      {
+        "name": "EntryAbility",
+        "srcEntry": "./ets/entryability/EntryAbility.ets",
+        "description": "$string:EntryAbility_desc",
+        "icon": "$media:layered_image",
+        "label": "$string:EntryAbility_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background",
+        "exported": true,
+        "skills": [
+          {
+            "entities": [
+              "entity.system.home"
+            ],
+            "actions": [
+              "ohos.want.action.home"
+            ]
+          }
+        ]
+      }
+    ],
+    "extensionAbilities": [
+      {
+        "name": "EntryBackupAbility",
+        "srcEntry": "./ets/entrybackupability/EntryBackupAbility.ets",
+        "type": "backup",
+        "exported": false,
+        "metadata": [
+          {
+            "name": "ohos.extension.backup",
+            "resource": "$profile:backup_config"
+          }
+        ],
+      }
+    ]
+  }
+}

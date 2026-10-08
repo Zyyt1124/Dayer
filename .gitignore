@@ -1,0 +1,16 @@
+/node_modules
+/oh_modules
+/local.properties
+/.idea
+**/build
+/.hvigor
+.cxx
+/.clangd
+/.clang-format
+/.clang-tidy
+**/.test
+/.appanalyzer
+
+# 真机验收时留下的截图，不属于工程源码
+/.shot*.jpeg
+/.verify.jpeg
