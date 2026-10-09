@@ -417,8 +417,14 @@ export struct StatsPage {
           .layoutWeight(1)
           .alignItems(HorizontalAlign.Center)
 
+          // ⚠️ 这两栏的**文案与计数字段是反向的**，不是笔误：
+          // overCount 数的是 «实际耗时超出预计»（TimeUtil 的 DeviationKind.OVER），
+          // 也就是用户**估低了**；underCount 反过来是「估高了」。
+          // 颜色跟着计数走（超出用暖色），所以只反文案、不反颜色。
+          // 2026-10-09 真机实测：3 条「预估 100 分钟、实际 150 分钟」的任务曾被这栏写成
+          // 「估高了 3」，与事实相反；真实数据恰好 1 高 1 低，两边都是 1 所以一直没暴露。
           Column() {
-            Text($r('app.string.stats_over'))
+            Text($r('app.string.stats_estimate_low'))
               .fontSize($r('app.float.font_small'))
               .fontColor($r('app.color.text_tertiary'))
             Text(countText(this.stats.overCount))
@@ -430,7 +436,7 @@ export struct StatsPage {
           .alignItems(HorizontalAlign.Center)
 
           Column() {
-            Text($r('app.string.stats_under'))
+            Text($r('app.string.stats_estimate_high'))
               .fontSize($r('app.float.font_small'))
               .fontColor($r('app.color.text_tertiary'))
             Text(countText(this.stats.underCount))

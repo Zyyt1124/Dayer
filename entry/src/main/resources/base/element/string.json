@@ -433,12 +433,12 @@
       "value": "估得准"
     },
     {
-      "name": "stats_over",
-      "value": "估高了"
+      "name": "stats_estimate_low",
+      "value": "估低了"
     },
     {
-      "name": "stats_under",
-      "value": "估低了"
+      "name": "stats_estimate_high",
+      "value": "估高了"
     },
     {
       "name": "stats_median_ratio",
