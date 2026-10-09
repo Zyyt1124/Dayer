@@ -41,8 +41,16 @@
       "value": "这一天没有任务"
     },
     {
+      "name": "history_empty_hint",
+      "value": "补记一个任务，它会归到这一天"
+    },
+    {
       "name": "action_new_task",
       "value": "新建任务"
+    },
+    {
+      "name": "action_backfill_task",
+      "value": "补记任务"
     },
     {
       "name": "action_save",
@@ -71,6 +79,10 @@
     {
       "name": "edit_title_edit",
       "value": "编辑任务"
+    },
+    {
+      "name": "edit_title_backfill",
+      "value": "补记任务"
     },
     {
       "name": "label_task_title",

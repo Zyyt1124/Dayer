@@ -22,7 +22,8 @@ const CATEGORIES: number[] = [
 /**
  * 任务的录入 / 编辑页。
  *
- * 跳转参数只有 taskId（0 = 新建），数据由本页自己向 DAO 查，不在路由栈上传递对象快照。
+ * 跳转参数只有 taskId（0 = 新建）与 createTime（0 = 用此刻，非 0 = 补记归属的那天零点），
+ * 数据由本页自己向 DAO 查，不在路由栈上传递对象快照。
  * pathStack 由父页直接传入 —— 省掉 NavDestinationContext 的 onReady 回调，少一层 API。
  *
  * 间距一律用 .margin()：Row/Column 的 space 参数类型是 string | number，收不了 $r() 资源。
@@ -31,6 +32,15 @@ const CATEGORIES: number[] = [
 export struct TaskEditPage {
   /** 0 表示新建 */
   taskId: number = 0;
+  /**
+   * 新任务归属的那一天（本地零点）；**0 = 用此刻**。注意它是「要写进去的值」，
+   * 不是任务真实的创建时间（那是 loaded.createTime，只在编辑模式有值）。
+   *
+   * 由首页在「翻到历史日后补记」时传入。刻意是**未装饰的普通成员**（与 taskId 一致）：
+   * 它只在压栈构造这一页时读一次，而这一页盖住首页期间首页不可能再改日期，
+   * 所以「构造时快照」正是我们要的语义 —— 不要改成会跟着变的 @Prop。
+   */
+  createTime: number = 0;
   pathStack: NavPathStack = new NavPathStack();
   /** 保存成功后通知父页刷新列表 */
   onChanged: () => void = () => {};
@@ -191,7 +201,14 @@ export struct TaskEditPage {
       return;
     }
 
-    task.createTime = Date.now();
+    // 补记（首页翻到历史日后新建）时用那天的本地零点，任务因此归属那一天；
+    // 0 = 没有补记上下文（今天新建），沿用「就是此刻」。
+    // ⚠️ 上面 taskId > 0 的分支已经 return —— 编辑既有任务永远走不到这里，
+    // 所以这个字段不可能把老任务的创建时间改掉。
+    // 刻意不在这里重新 startOfDay(this.createTime)：首页传进来的已经是零点，
+    // 再规整一次只会把「调用方传了个半天中的时刻」这种 bug 悄悄抹掉，
+    // 而这个值最终要落库、要对上验收 SQL 里的那个毫秒数。
+    task.createTime = this.createTime > 0 ? this.createTime : Date.now();
     task.status = TaskStatus.NOT_STARTED;
     TaskDao.insert(task)
       .then((rowId: number) => {
@@ -542,6 +559,10 @@ export struct TaskEditPage {
       .backgroundColor($r('app.color.page_background'))
       .align(Alignment.Top)
     }
-    .title(this.taskId > 0 ? $r('app.string.edit_title_edit') : $r('app.string.edit_title_new'))
+    // 三态：编辑既有任务 / 补记到历史某天 / 今天新建。
+    // 补记这一态不能省：入口按钮上写着「补记任务」，点进来标题却说「新建任务」，
+    // 是全屏最显眼的一处自相矛盾。
+    .title(this.taskId > 0 ? $r('app.string.edit_title_edit')
+      : (this.createTime > 0 ? $r('app.string.edit_title_backfill') : $r('app.string.edit_title_new')))
   }
 }

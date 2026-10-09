@@ -370,8 +370,24 @@ struct Index {
   }
 
   private openNewTask(): void {
-    // taskId = 0 表示新建
+    // taskId = 0 表示新建；createTime 用默认的 0（此刻），任务落在今天
     this.pathStack.pushPathByName(ROUTE_TASK_EDIT, new TaskRouteParam(0));
+  }
+
+  /**
+   * 补记：翻到历史日后新建的任务要归属**正在浏览的那一天**。
+   *
+   * 传 selectedDayStart（那天的本地零点）而不是「此刻」—— 零点必然落在 dayRangeOf
+   * 算出的 [那天, 次日) 区间内，于是 queryByDay 的「创建于该日」分支一定命中。
+   * 在事件回调里读 @State 是允许的（约束只针对 build() 与 @Builder），
+   * 读到的一定是用户按下按钮那一刻正在看的那一天。
+   *
+   * ⚠️ 已知且**接受**的后果：这条任务状态是待开始，因此**也会出现在「今天」的列表里**
+   * （QUERY_TODAY_SQL 额外 OR status IN (0,1)：未完成的跨天任务不从今天的列表消失）。
+   * 这是既有规则的自然延伸，不是 bug；要记实际耗时就再走详情页的「记录实际用时」。
+   */
+  private openBackfillTask(): void {
+    this.pathStack.pushPathByName(ROUTE_TASK_EDIT, new TaskRouteParam(0, this.selectedDayStart));
   }
 
   /**
@@ -392,6 +408,10 @@ struct Index {
     if (name === ROUTE_TASK_EDIT && param instanceof TaskRouteParam) {
       TaskEditPage({
         taskId: param.taskId,
+        // 详情页路由共用这个类，它不读这个字段；今天新建时拿到的是 0。
+        // 这里不必担心「@Builder 带参会按值传递、不重绘」：目标页是在压栈那一刻
+        // 同步构造的，读的就是刚 new 出来的这个 param，不依赖后续重绘。
+        createTime: param.createTime,
         pathStack: this.pathStack,
         onChanged: () => {
           this.reload();
@@ -410,7 +430,9 @@ struct Index {
 
   /**
    * 空状态。文案按「今天 / 历史日」分支 —— 历史日说「今天还没有任务」是直接说错话。
-   * 历史日也不显示「新建一个任务…」那句引导：在回溯场景下劝人新建毫无意义。
+   * 两个分支都给引导语：今天的是「新建」，历史日的是「补记」——
+   * 后者确实会落在正在看的这一天，所以在这里说得通（原先不显示引导，
+   * 理由是「在回溯场景下劝人新建毫无意义」，补记把这个理由消掉了）。
    *
    * ⚠️ 无参数 @Builder，在函数体里读 this.isToday()（理由见 RunningCard 的注释）
    */
@@ -423,6 +445,11 @@ struct Index {
         .margin({ bottom: $r('app.float.spacing_small') })
       if (this.isToday()) {
         Text($r('app.string.home_empty_hint'))
+          .fontSize($r('app.float.font_caption'))
+          .fontColor($r('app.color.text_tertiary'))
+          .textAlign(TextAlign.Center)
+      } else {
+        Text($r('app.string.history_empty_hint'))
           .fontSize($r('app.float.font_caption'))
           .fontColor($r('app.color.text_tertiary'))
           .textAlign(TextAlign.Center)
@@ -646,8 +673,13 @@ struct Index {
           .scrollBar(BarState.Off)
         }
 
-        // 新建只在今天给。历史日点它，新任务的创建时间是此刻，不会出现在正在浏览的那一天 ——
-        // 一个按钮做完事却在别处生效，比干脆不显示更让人困惑。
+        // 今天给「新建任务」：创建时间就是此刻，任务落在今天，与这一屏是同一件事。
+        // 历史日给「补记任务」：把正在浏览的那一天的零点带进编辑页，任务因此归到那一天 ——
+        // 按钮做的事和它所在的这一屏仍然是同一件事。
+        // （旧实现在历史日干脆不渲染按钮，理由是「点它在别处生效」；补记这个能力把那条理由消掉了。）
+        //
+        // ⚠️ 这两支刻意留在 build() 里、不抽成 @Builder：带上参数就会退化成按值传递，
+        // 翻日期时这里会停在首帧（本项目在 TaskDetailPage.MetricColumn 上吃过一次）。
         if (this.isToday()) {
           Button($r('app.string.action_new_task'))
             .width('100%')
@@ -655,6 +687,14 @@ struct Index {
             .margin({ top: $r('app.float.spacing_medium') })
             .onClick(() => {
               this.openNewTask();
+            })
+        } else {
+          Button($r('app.string.action_backfill_task'))
+            .width('100%')
+            .height($r('app.float.height_button'))
+            .margin({ top: $r('app.float.spacing_medium') })
+            .onClick(() => {
+              this.openBackfillTask();
             })
         }
       }
