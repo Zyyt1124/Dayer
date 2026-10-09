@@ -69,6 +69,32 @@ export class BiasResult {
   }
 }
 
+/**
+ * 倍率的**十分位整数** → 显示用的整数位与小数位。
+ *
+ * 倍率在内存里一律存成十分位整数（1.4 倍存 14），显示时才拆成两个整数，
+ * 因为资源占位符只有 %d 可用（见 TaskConstants.ratioText 的注释）。
+ *
+ * 这两个函数放在本文件而不是 TaskConstants：倍率这个概念的所有者在这里
+ * （MIN_SAMPLES、clampRatio、medianRatio 都在这），而 TaskConstants 用了 $r()、
+ * 纯逻辑模块不能 import 它 —— 拆分规则只有一份，两处显示才不会一边 1.4 一边 1.5。
+ *
+ * 夹紧行为与原来的 ratioText 逐位一致：0 或负数归 0（没有「0 倍」这种说法）。
+ */
+function safeTenths(tenths: number): number {
+  return tenths > 0 ? Math.round(tenths) : 0;
+}
+
+/** 倍率的整数位：14 → 1 */
+export function ratioWhole(tenths: number): number {
+  return Math.floor(safeTenths(tenths) / 10);
+}
+
+/** 倍率的小数位：14 → 4 */
+export function ratioTenth(tenths: number): number {
+  return safeTenths(tenths) % 10;
+}
+
 function clampRatio(ratio: number): number {
   if (ratio < MIN_RATIO) {
     return MIN_RATIO;

@@ -375,6 +375,138 @@
     {
       "name": "progress_ack",
       "value": "知道了"
+    },
+    {
+      "name": "stats_title",
+      "value": "统计"
+    },
+    {
+      "name": "stats_window_today",
+      "value": "今日"
+    },
+    {
+      "name": "stats_window_week",
+      "value": "本周"
+    },
+    {
+      "name": "stats_window_month",
+      "value": "本月"
+    },
+    {
+      "name": "stats_window_all",
+      "value": "全部"
+    },
+    {
+      "name": "stats_overview",
+      "value": "完成情况"
+    },
+    {
+      "name": "stats_estimation",
+      "value": "估时表现"
+    },
+    {
+      "name": "stats_category",
+      "value": "分类耗时"
+    },
+    {
+      "name": "stats_fraction",
+      "value": "%d / %d"
+    },
+    {
+      "name": "stats_done_on_time",
+      "value": "按期完成"
+    },
+    {
+      "name": "stats_done_late",
+      "value": "延期完成"
+    },
+    {
+      "name": "stats_unfinished",
+      "value": "未完成"
+    },
+    {
+      "name": "stats_settled",
+      "value": "已结算 %d 条"
+    },
+    {
+      "name": "stats_accurate",
+      "value": "估得准"
+    },
+    {
+      "name": "stats_over",
+      "value": "估高了"
+    },
+    {
+      "name": "stats_under",
+      "value": "估低了"
+    },
+    {
+      "name": "stats_median_ratio",
+      "value": "中位倍率"
+    },
+    {
+      "name": "stats_not_enough",
+      "value": "样本还不够"
+    },
+    {
+      "name": "stats_no_timing",
+      "value": "这段时间还没有可比的实际计时"
+    },
+    {
+      "name": "stats_empty",
+      "value": "这段时间还没有已结算的任务"
+    },
+    {
+      "name": "advice_title",
+      "value": "复盘建议"
+    },
+    {
+      "name": "advice_basis",
+      "value": "基于全部 %d 条已结算记录"
+    },
+    {
+      "name": "advice_none",
+      "value": "没发现明显的规律，保持现在的节奏就好"
+    },
+    {
+      "name": "advice_not_enough",
+      "value": "记录还太少，多做几条、做完记得点「完成」，这里就会给出复盘建议"
+    },
+    {
+      "name": "advice_chip_overall",
+      "value": "整体"
+    },
+    {
+      "name": "advice_chip_priority",
+      "value": "优先级"
+    },
+    {
+      "name": "advice_category_over",
+      "value": "类任务实际通常要花到预估的 %d.%d 倍，下次照这个数预留"
+    },
+    {
+      "name": "advice_category_under",
+      "value": "类任务通常能提前做完，实际只用到预估的 %d.%d 倍，预估可以再紧一点"
+    },
+    {
+      "name": "advice_category_near",
+      "value": "类任务还差 %d 条计时记录就能给出估时建议"
+    },
+    {
+      "name": "advice_timing_coverage",
+      "value": "%d 条已结算任务里只有 %d 条记了实际用时，估时复盘只能覆盖这些"
+    },
+    {
+      "name": "advice_completion_low",
+      "value": "%d 条已结算任务里有 %d 条没做完"
+    },
+    {
+      "name": "advice_late",
+      "value": "%d 条设了截止时间的已完成任务里，有 %d 条是超时完成的，时限可能定得太紧"
+    },
+    {
+      "name": "advice_priority_low",
+      "value": "高优先级任务 %d 条只完成了 %d 条，不如其他任务"
     }
   ]
 }

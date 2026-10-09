@@ -41,40 +41,49 @@ const QUERY_COMPLETED_SQL: string =
   `ORDER BY ${TaskCol.ACTUAL_END_TIME} DESC LIMIT ${SCAN_LIMIT}`;
 
 /**
- * 「某一天有哪些任务」的判定：**创建于该日 ∪ 结束于该日**（半开区间 [dayStart, dayEnd)）。
+ * 「这个时间区间内有哪些任务」的判定：**创建于该区间 ∪ 结束于该区间**（半开区间 [start, end)）。
  *
- * 为什么口径是「∪ 结束于该日」而不是「∪ 未完成」：一条 10 月 5 日创建、今天才做完的任务，
+ * 首页传的是**一天**的区间（所以历史上叫 QUERY_BY_DAY_*），统计页传的是**一个窗口**的区间
+ * （今天 / 本周 / 本月 / 不限）—— 同一条谓词，只是区间的长度不同，因此改叫 IN_RANGE。
+ *
+ * 为什么口径是「∪ 结束于该区间」而不是「∪ 未完成」：一条 10 月 5 日创建、今天才做完的任务，
  * 在点「完成」的那一刻会掉出 create_time 区间、状态也不再是「未完成」，于是从首页消失 ——
- * 用户刚做完一件事，它就不见了。换成「结束于该日」后，完成动作本身把它带进当天的视图。
+ * 用户刚做完一件事，它就不见了。换成「结束于该区间」后，完成动作本身把它带进当天的视图。
  *
  * ⚠️ 三条看似多余的写法的理由：
  * - `IS NOT NULL`：SQLite 三值逻辑下 `NULL >= x` 求值为 NULL（假），不加也对。写上是为了
  *   读的人不必在脑子里过一遍三值逻辑，且日后给这列建索引时优化器更容易走区间。
  * - 不加 `DISTINCT`：单表扫描，一行最多命中一次，OR 不产生重复行。
- * - 绑参顺序是 [dayStart, dayEnd, dayStart, dayEnd]，与四个 `?` 的位置一一对应。
+ * - 绑参顺序是 [start, end, start, end]，与四个 `?` 的位置一一对应。
+ *
+ * ⚠️ 已知缺口：[start, end) 的左边界是**创建时间**，所以「创建于区间之前、废弃于区间之内」
+ * 且从没点过开始的任务（actual_end_time 为 NULL）两条分支都落不进来，会被漏掉。
+ * 这是首页与统计页共用的口径，统计页的完成率因此会偏高 —— 详见 TaskStats.ets 的头注释。
  */
-const QUERY_BY_DAY_WHERE: string =
+const QUERY_IN_RANGE_WHERE: string =
   `(${TaskCol.CREATE_TIME} >= ? AND ${TaskCol.CREATE_TIME} < ?) ` +
   `OR (${TaskCol.ACTUAL_END_TIME} IS NOT NULL ` +
   `AND ${TaskCol.ACTUAL_END_TIME} >= ? AND ${TaskCol.ACTUAL_END_TIME} < ?)`;
 
 /** 未完成排前面，再按优先级，最后按创建时间。历史日与今日共用，排序不会随视图跳变 */
-const QUERY_BY_DAY_ORDER: string =
+const QUERY_IN_RANGE_ORDER: string =
   ` ORDER BY ${TaskCol.STATUS} ASC, ${TaskCol.PRIORITY} DESC, ${TaskCol.CREATE_TIME} ASC`;
 
-/** 历史上的某一天 */
-const QUERY_BY_DAY_SQL: string =
-  `SELECT * FROM ${TABLE_TASK} WHERE ${QUERY_BY_DAY_WHERE}${QUERY_BY_DAY_ORDER}`;
+/** 历史上的某一天 / 统计页的一个时间窗口 */
+const QUERY_IN_RANGE_SQL: string =
+  `SELECT * FROM ${TABLE_TASK} WHERE ${QUERY_IN_RANGE_WHERE}${QUERY_IN_RANGE_ORDER}`;
 
 /**
  * 今天 = 上面那条 + **所有尚未完成的任务**。
  * 未完成的跨天任务不能从列表里消失，否则用户会以为它被删了。
  * 只有「今天」能加这个分支：加到历史日上会把所有未完成任务灌进每一个过去的日子。
+ *
+ * ⚠️ 统计页刻意**不**加这个分支：那样「今日」的完成率会被一堆刚建的任务稀释成 0。
  */
 const QUERY_TODAY_SQL: string =
-  `SELECT * FROM ${TABLE_TASK} WHERE (${QUERY_BY_DAY_WHERE}) ` +
+  `SELECT * FROM ${TABLE_TASK} WHERE (${QUERY_IN_RANGE_WHERE}) ` +
   `OR ${TaskCol.STATUS} IN (${TaskStatus.NOT_STARTED}, ${TaskStatus.IN_PROGRESS})` +
-  QUERY_BY_DAY_ORDER;
+  QUERY_IN_RANGE_ORDER;
 
 const QUERY_BY_ID_SQL: string = `SELECT * FROM ${TABLE_TASK} WHERE ${TaskCol.ID} = ?`;
 
@@ -170,8 +179,23 @@ export class TaskDao {
    *        历史日传 true 会把所有未完成任务灌进每一个过去的日子。
    */
   static queryByDay(dayStart: number, dayEnd: number, includeUnfinished: boolean): Promise<Task[]> {
-    const sql: string = includeUnfinished ? QUERY_TODAY_SQL : QUERY_BY_DAY_SQL;
+    const sql: string = includeUnfinished ? QUERY_TODAY_SQL : QUERY_IN_RANGE_SQL;
     return TaskDao.queryTasks(sql, [dayStart, dayEnd, dayStart, dayEnd]);
+  }
+
+  /**
+   * 一个时间区间内的任务，口径与 queryByDay 完全相同（创建于区间 ∪ 结束于区间），
+   * 只是区间可以跨很多天 —— 统计页用（今日 / 本周 / 本月 / 不限）。
+   *
+   * 刻意不复用 queryByDay：那个签名里的 includeUnfinished 只对「今天」有意义
+   * （见它的注释），统计页永远不需要那个分支，硬套会把一个日视图的概念带进窗口视图。
+   *
+   * ⚠️ 【不限】窗口传 rangeStart = 0，会命中整表（与 queryByDay 一样没有 LIMIT）。
+   * 个人任务量（几百到几千行）之下可以接受；真到需要分页时，瓶颈在渲染那一侧，
+   * 而分页会让「按分类占比」算不出来，所以不提前做。
+   */
+  static queryByRange(rangeStart: number, rangeEnd: number): Promise<Task[]> {
+    return TaskDao.queryTasks(QUERY_IN_RANGE_SQL, [rangeStart, rangeEnd, rangeStart, rangeEnd]);
   }
 
   /**

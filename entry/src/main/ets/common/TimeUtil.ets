@@ -176,6 +176,36 @@ export function startOfTomorrow(now: number): number {
   return dayRangeOf(now).end;
 }
 
+/**
+ * 某时刻所属那一周的零点，**以周一为一周之始**（中文语境下「本周」的默认含义）。
+ *
+ * `getDay()` 里 0 是周日、1 是周一，直接减 1 会让周日算出 -1 天、落到上一周的周六，
+ * 于是「本周」在周日那天整整少算一周。加 6 再取模把周日映射成 6（距本周一已过 6 天），
+ * 一周七天就都落在 0..6 上。
+ *
+ * 平移走 `shiftDays` 而不是 `- offset * 86400000` —— 理由见 shiftDays 自己的注释；
+ * 外层再套一次 `startOfDay` 是为了让跨夏令时切换周的钟面漂移归零。
+ */
+export function startOfWeek(anchor: number): number {
+  const dayOfWeek: number = new Date(anchor).getDay();
+  const daysSinceMonday: number = (dayOfWeek + 6) % 7;
+  return startOfDay(shiftDays(startOfDay(anchor), -daysSinceMonday));
+}
+
+/**
+ * 某时刻所属那个月 1 号的零点。
+ *
+ * 用 `setDate(1)` 直接改日历字段，不经由「减掉今天是几号」的算术：
+ * 1 号减 1 天会落到上个月最后一天（3 月 1 日 → 2 月 28/29 日），
+ * 那是「上个月末」而不是「本月 1 号」，是这类代码最常见的差一天。
+ */
+export function startOfMonth(anchor: number): number {
+  const d: Date = new Date(anchor);
+  d.setDate(1);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
 /** 把某一天的时间戳推到当天 23:59:59.999 */
 export function endOfDay(timestamp: number): number {
   const d: Date = new Date(timestamp);

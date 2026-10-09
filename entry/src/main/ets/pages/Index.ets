@@ -19,11 +19,12 @@ import {
 } from '../common/TaskProgress';
 import { applyComplete } from '../common/TaskFlow';
 import { Task, TaskStatus } from '../model/Task';
-import { ROUTE_TASK_DETAIL, ROUTE_TASK_EDIT, TaskRouteParam } from '../model/RouteName';
+import { ROUTE_STATS, ROUTE_TASK_DETAIL, ROUTE_TASK_EDIT, TaskRouteParam } from '../model/RouteName';
 import { TaskDao } from '../data/TaskDao';
 import { TaskListItem } from '../views/TaskListItem';
 import { TaskEditPage } from '../views/TaskEditPage';
 import { TaskDetailPage } from '../views/TaskDetailPage';
+import { StatsPage } from '../views/StatsPage';
 
 const TAG: string = 'Index';
 
@@ -391,6 +392,15 @@ struct Index {
   }
 
   /**
+   * 统计页。它**不读任何路由参数**（时间窗口是页内状态），但仍旧传一个 TaskRouteParam：
+   * PageMap 的第二个形参声明成了 TaskRouteParam，传别的类型过不了编译，
+   * 而为一个空参数新造一个类不如复用现成的（详情页路由也复用同一个类、同样不读它）。
+   */
+  private openStats(): void {
+    this.pathStack.pushPathByName(ROUTE_STATS, new TaskRouteParam(0));
+  }
+
+  /**
    * 路由表。每个分支必须只有一个根节点，且**不能给这些自定义组件挂任何属性或事件**
    * （官方 navDestination 文档：否则只会显示空白内容）。
    *
@@ -425,6 +435,14 @@ struct Index {
           this.reload();
         }
       })
+    } else if (name === ROUTE_STATS) {
+      // 不判 instanceof：这一支根本不读 param。传进来的那个 TaskRouteParam
+      // 只是为了让签名对得上（见 openStats 的注释）。
+      //
+      // 不传 pathStack、也不传 onChanged —— 统计页都收不到、也不需要：
+      // 它不往任何地方压栈，数据由它自己在 onWillShow 里刷新；
+      // 反过来首页列表由首页自己的 onPageShow/reload 刷新，两页互不依赖。
+      StatsPage()
     }
   }
 
@@ -513,6 +531,17 @@ struct Index {
         .enabled(this.canGoNextDay())
         .onClick(() => {
           this.goNextDay();
+        })
+
+      // 统计入口。放在标题栏最右侧而不是底部按钮区：底部那两个按钮是「对这一天做什么」，
+      // 而统计是「看一段时间的汇总」，跟正在浏览哪一天无关，混在一起会让人以为它只统计当天。
+      // 日期列是 layoutWeight(1)，宽度不够时由它让位，日期会截断但两个箭头和这个入口不会被挤走。
+      Text($r('app.string.stats_title'))
+        .fontSize($r('app.float.font_caption'))
+        .fontColor($r('app.color.accent'))
+        .padding({ left: $r('app.float.spacing_medium'), right: $r('app.float.spacing_medium') })
+        .onClick(() => {
+          this.openStats();
         })
     }
     .width('100%')

@@ -7,6 +7,12 @@
 
 export const ROUTE_TASK_EDIT: string = 'TaskEdit';
 export const ROUTE_TASK_DETAIL: string = 'TaskDetail';
+/**
+ * 统计页。它**不收任何参数**（时间窗口是页内状态），但压栈时仍会带一个
+ * TaskRouteParam —— PageMap 的第二个形参声明成了 TaskRouteParam，传别的类型过不了类型检查，
+ * 而为此新造一个空参数类不如复用现成的（详情页路由也是这么复用它的）。
+ */
+export const ROUTE_STATS: string = 'Stats';
 
 /** 跳转参数只带 id，目标页自己去 DAO 查最新数据，避免在栈上传递会过期的对象快照 */
 export class TaskRouteParam {

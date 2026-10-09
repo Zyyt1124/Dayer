@@ -5,6 +5,8 @@ import {
   BiasSample,
   MIN_SAMPLES,
   estimateBias,
+  ratioTenth,
+  ratioWhole,
   suggestedMinutes
 } from '../main/ets/common/EstimateBias';
 
@@ -187,6 +189,38 @@ export default function estimateBiasTest() {
       expect(suggestedMinutes(5, bias)).assertEqual(1);
       // 1 × 0.2 = 0.2 → round 成 0，被下限兜住
       expect(suggestedMinutes(1, bias)).assertEqual(1);
+    });
+
+    // ---- 倍率的整数位/小数位拆分 ----
+    // 显示层（ratioText 与复盘建议的句子）共用这一份拆分，所以它自己的边界要被钉住
+
+    it('ratioWhole_and_ratioTenth_split_tenths', 0, () => {
+      expect(ratioWhole(14)).assertEqual(1);
+      expect(ratioTenth(14)).assertEqual(4);
+      // 整倍：小数位是 0，不是省略
+      expect(ratioWhole(10)).assertEqual(1);
+      expect(ratioTenth(10)).assertEqual(0);
+      // 不满一倍
+      expect(ratioWhole(8)).assertEqual(0);
+      expect(ratioTenth(8)).assertEqual(8);
+      // 超过十倍（clampRatio 的上界是 5，但显示层不该依赖那个上界）
+      expect(ratioWhole(52)).assertEqual(5);
+      expect(ratioTenth(52)).assertEqual(2);
+    });
+
+    it('ratioWhole_and_ratioTenth_clamp_non_positive_to_zero', 0, () => {
+      // 与重构前的 ratioText 逐位一致：没有「0 倍」这种说法
+      expect(ratioWhole(0)).assertEqual(0);
+      expect(ratioTenth(0)).assertEqual(0);
+      expect(ratioWhole(-5)).assertEqual(0);
+      expect(ratioTenth(-5)).assertEqual(0);
+    });
+
+    it('ratioWhole_and_ratioTenth_round_float_tenths', 0, () => {
+      // tenths 由 Math.round(medianRatio * 10) 产生，但这里也要经得起浮点残留
+      expect(ratioWhole(14.000000000000002)).assertEqual(1);
+      expect(ratioTenth(14.000000000000002)).assertEqual(4);
+      expect(ratioTenth(13.6)).assertEqual(4);
     });
 
     it('is_deterministic_regardless_of_input_order', 0, () => {

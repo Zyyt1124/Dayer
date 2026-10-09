@@ -4,6 +4,8 @@ import migrationTest from './Migration.test';
 import estimateBiasTest from './EstimateBias.test';
 import reminderPlanTest from './ReminderPlan.test';
 import taskProgressTest from './TaskProgress.test';
+import taskStatsTest from './TaskStats.test';
+import reviewAdviceTest from './ReviewAdvice.test';
 
 export default function testsuite() {
   timeUtilTest();
@@ -12,4 +14,6 @@ export default function testsuite() {
   estimateBiasTest();
   reminderPlanTest();
   taskProgressTest();
+  taskStatsTest();
+  reviewAdviceTest();
 }

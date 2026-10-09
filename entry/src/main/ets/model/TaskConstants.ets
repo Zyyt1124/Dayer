@@ -1,3 +1,5 @@
+import { ratioTenth, ratioWhole } from '../common/EstimateBias';
+import { Advice, AdviceCode } from '../common/ReviewAdvice';
 import { DeviationKind } from '../common/TimeUtil';
 import { TaskPriority, TaskStatus } from './Task';
 
@@ -75,10 +77,12 @@ export const QUICK_MINUTES: number[] = [15, 30, 45, 60, 90, 120];
  * 1. 资源占位符只有 %d 可用（已是全工程既定写法，见 duration_* 几个 key），
  *    小数只能拆成整数位和小数位两个 %d；
  * 2. @State 里存整数比存浮点稳妥，不会出现 1.4000000000000001 这种显示。
+ *
+ * 拆分交给 EstimateBias 的 ratioWhole / ratioTenth —— 复盘建议的句子里也要拆同一个倍率，
+ * 两处各写一份迟早会出现「分类卡说 1.4 倍、复盘卡说 1.5 倍」。
  */
 export function ratioText(tenths: number): Resource {
-  const safe: number = tenths > 0 ? Math.round(tenths) : 0;
-  return $r('app.string.coach_ratio', Math.floor(safe / 10), safe % 10);
+  return $r('app.string.coach_ratio', ratioWhole(tenths), ratioTenth(tenths));
 }
 
 /**
@@ -132,4 +136,52 @@ export function priorityColor(priority: number): Resource {
     return $r('app.color.priority_low');
   }
   return $r('app.color.priority_medium');
+}
+
+/**
+ * 复盘建议左侧的小标签。
+ *
+ * ⚠️ **必须按 code 分支**，不能无条件 `categoryText(advice.categoryId)` ——
+ * categoryText 的兜底分支返回的是「工作」，而「计时覆盖率太低」这类建议的
+ * categoryId 是 ANY_CATEGORY(-1)，会把一个「工作」标签顶在一条跟工作无关的建议上。
+ */
+export function adviceChipText(advice: Advice): Resource {
+  if (advice.code === AdviceCode.CATEGORY_OVER
+    || advice.code === AdviceCode.CATEGORY_UNDER
+    || advice.code === AdviceCode.CATEGORY_NEAR) {
+    return categoryText(advice.categoryId);
+  }
+  if (advice.code === AdviceCode.PRIORITY_LOW) {
+    return $r('app.string.advice_chip_priority');
+  }
+  return $r('app.string.advice_chip_overall');
+}
+
+/**
+ * 复盘建议的句子。
+ *
+ * 分数类建议的参数顺序统一是「分母, 分子」——句子的主语是依据总量，
+ * 再点出其中有多少（「11 条已结算里只有 3 条记了计时」），与中文语序一致。
+ */
+export function adviceSentence(advice: Advice): Resource {
+  if (advice.code === AdviceCode.CATEGORY_OVER) {
+    return $r('app.string.advice_category_over', ratioWhole(advice.tenths), ratioTenth(advice.tenths));
+  }
+  if (advice.code === AdviceCode.CATEGORY_UNDER) {
+    return $r('app.string.advice_category_under', ratioWhole(advice.tenths), ratioTenth(advice.tenths));
+  }
+  if (advice.code === AdviceCode.CATEGORY_NEAR) {
+    // 还差几条 = 分母 - 分子（分子是已记的样本数，分母是 MIN_SAMPLES）
+    return $r('app.string.advice_category_near', advice.denominator - advice.numerator);
+  }
+  if (advice.code === AdviceCode.TIMING_COVERAGE) {
+    return $r('app.string.advice_timing_coverage', advice.denominator, advice.numerator);
+  }
+  if (advice.code === AdviceCode.COMPLETION_LOW) {
+    return $r('app.string.advice_completion_low', advice.denominator, advice.numerator);
+  }
+  if (advice.code === AdviceCode.LATE) {
+    return $r('app.string.advice_late', advice.denominator, advice.numerator);
+  }
+  return $r('app.string.advice_priority_low', advice.denominator, advice.numerator);
 }

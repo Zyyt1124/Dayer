@@ -12,6 +12,8 @@ import {
   dayRangeOf,
   startOfToday,
   startOfTomorrow,
+  startOfWeek,
+  startOfMonth,
   endOfDay,
   formatDate
 } from '../main/ets/common/TimeUtil';
@@ -206,6 +208,109 @@ export default function timeUtilTest() {
       const tomorrow: Date = new Date(startOfTomorrow(monthEnd));
       expect(tomorrow.getMonth()).assertEqual(1);
       expect(tomorrow.getDate()).assertEqual(1);
+    });
+
+    // ---- 周零点 / 月零点 ----
+    // 这一组守的是统计页「本周 / 本月」两个窗口的地基。
+    // 星期算错不会报错，只会安静地把「本周」变成「上一周」或「最近七天」。
+
+    it('startOfWeek_is_monday_midnight', 0, () => {
+      // 2026-06-10 是周三 → 本周一是 06-08
+      const wednesday: number = new Date(2026, 5, 10, 15, 30, 0).getTime();
+      const d: Date = new Date(startOfWeek(wednesday));
+      expect(d.getMonth()).assertEqual(5);
+      expect(d.getDate()).assertEqual(8);
+      expect(d.getHours()).assertEqual(0);
+      expect(d.getMinutes()).assertEqual(0);
+      // 断言的是真正的星期，而不是「减了两天」这种可能碰巧成立的巧合
+      expect(d.getDay()).assertEqual(1);
+    });
+
+    it('startOfWeek_on_sunday_goes_back_six_days', 0, () => {
+      // 周日是 (getDay() + 6) % 7 唯一的临界点：getDay() 返回 0，
+      // 写成 getDay() - 1 会得到 -1 天，于是周日那天「本周」整整少算一周、变成上周六。
+      const sunday: number = new Date(2026, 5, 14, 9, 0, 0).getTime();
+      expect(new Date(sunday).getDay()).assertEqual(0);
+
+      const d: Date = new Date(startOfWeek(sunday));
+      expect(d.getDay()).assertEqual(1);
+      expect(d.getDate()).assertEqual(8);
+    });
+
+    it('startOfWeek_on_monday_is_that_same_day', 0, () => {
+      const monday: number = new Date(2026, 5, 8, 9, 0, 0).getTime();
+      expect(new Date(monday).getDay()).assertEqual(1);
+
+      const d: Date = new Date(startOfWeek(monday));
+      expect(d.getDate()).assertEqual(8);
+      expect(d.getHours()).assertEqual(0);
+    });
+
+    it('startOfWeek_crosses_the_year_boundary', 0, () => {
+      // 2026-01-01 是周四 → 那一周从 2025-12-29（周一）起算。
+      // 「本周」落进上一年是完全正常的，不能在这里返回本年 1 月 1 日。
+      const newYear: number = new Date(2026, 0, 1, 8, 0, 0).getTime();
+      expect(new Date(newYear).getDay()).assertEqual(4);
+
+      const d: Date = new Date(startOfWeek(newYear));
+      expect(d.getFullYear()).assertEqual(2025);
+      expect(d.getMonth()).assertEqual(11);
+      expect(d.getDate()).assertEqual(29);
+      expect(d.getDay()).assertEqual(1);
+    });
+
+    it('startOfWeek_is_stable_for_any_day_of_the_week', 0, () => {
+      // 同一周里的任何时刻都必须得到同一个周一，否则用户周内切来切去会看到不同结果
+      const monday: number = new Date(2026, 5, 8, 0, 0, 0).getTime();
+      const expected: number = startOfWeek(monday);
+
+      for (let i = 0; i < 7; i++) {
+        expect(startOfWeek(shiftDays(monday, i))).assertEqual(expected);
+        // 当天最晚的一毫秒也必须在同一周内
+        expect(startOfWeek(endOfDay(shiftDays(monday, i)))).assertEqual(expected);
+      }
+      // 第 7 天（下周一）必须换到新的一周
+      expect(startOfWeek(shiftDays(monday, 7)) === expected).assertFalse();
+    });
+
+    it('startOfMonth_is_the_first_at_midnight', 0, () => {
+      const anchor: number = new Date(2026, 5, 10, 15, 30, 0).getTime();
+      const d: Date = new Date(startOfMonth(anchor));
+      expect(d.getMonth()).assertEqual(5);
+      expect(d.getDate()).assertEqual(1);
+      expect(d.getHours()).assertEqual(0);
+      expect(d.getMinutes()).assertEqual(0);
+      expect(d.getSeconds()).assertEqual(0);
+    });
+
+    it('startOfMonth_from_a_month_end_does_not_slip_into_the_previous_month', 0, () => {
+      // 这类代码最常见的差一天：3 月 31 日往前「减掉今天是几号」会落到 2 月 28/29 日，
+      // 那是上个月末而不是本月 1 号。
+      const monthEnd: number = new Date(2026, 2, 31, 12, 0, 0).getTime();
+      const d: Date = new Date(startOfMonth(monthEnd));
+      expect(d.getMonth()).assertEqual(2);
+      expect(d.getDate()).assertEqual(1);
+    });
+
+    it('startOfMonth_on_the_first_is_identity_on_that_day', 0, () => {
+      const first: number = new Date(2026, 6, 1, 0, 0, 0).getTime();
+      expect(startOfMonth(first)).assertEqual(first);
+    });
+
+    it('startOfMonth_handles_the_year_boundary', 0, () => {
+      const january: number = new Date(2026, 0, 15, 12, 0, 0).getTime();
+      const d: Date = new Date(startOfMonth(january));
+      expect(d.getFullYear()).assertEqual(2026);
+      expect(d.getMonth()).assertEqual(0);
+      expect(d.getDate()).assertEqual(1);
+    });
+
+    it('startOfMonth_handles_a_leap_february', 0, () => {
+      // 2024 是闰年：2 月有 29 天，3 月 1 日往前不能落到 2 月 28 日
+      const march: number = new Date(2024, 2, 1, 6, 0, 0).getTime();
+      const d: Date = new Date(startOfMonth(march));
+      expect(d.getMonth()).assertEqual(2);
+      expect(d.getDate()).assertEqual(1);
     });
 
     // ---- 按日历天平移 ----
