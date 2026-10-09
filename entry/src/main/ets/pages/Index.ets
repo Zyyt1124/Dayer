@@ -167,6 +167,10 @@ struct Index {
         this.loaded = true;
         Logger.error(TAG, `queryByDay failed: ${err.code} ${err.message}`);
         showToast(this.getUIContext(), $r('app.string.toast_load_failed'));
+        // 查询失败也必须过一遍表。翻到历史日时若这次查询恰好失败，上面那份
+        // 「今天有任务在跑」的旧状态会让定时器继续每 30 秒醒一次。
+        // 停表只看 isToday()、不看这次查到的行，所以这里拿旧 tasks 判断是安全的。
+        this.syncTicker();
       });
   }
 
